@@ -26,6 +26,28 @@ const api = axios.create({
 });
 
 export const uploadWardrobeItem = async (imageUri: string, category: string, token: string) => {
+    // Validate imageUri
+    if (!imageUri || typeof imageUri !== 'string' || imageUri.trim() === '') {
+        throw new Error('Invalid imageUri: must be a non-empty string');
+    }
+
+    // Validate that imageUri is a valid URI format (file://, content://, or http(s)://)
+    const uriPattern = /^(file|content|https?):\/\/\S+$/i;
+    if (!uriPattern.test(imageUri.trim())) {
+        throw new Error('Invalid imageUri: must be a valid URI format (file://, content://, or http(s)://)');
+    }
+
+    // Validate category
+    if (!category || typeof category !== 'string' || category.trim() === '') {
+        throw new Error('Invalid category: must be a non-empty string');
+    }
+
+    // Validate that category doesn't contain invalid characters (allow letters, numbers, spaces, hyphens, underscores)
+    const categoryPattern = /^[a-zA-Z0-9\s\-_]+$/;
+    if (!categoryPattern.test(category.trim())) {
+        throw new Error('Invalid category: contains invalid characters. Only letters, numbers, spaces, hyphens, and underscores are allowed');
+    }
+
     const formData = new FormData();
 
     // Append image
