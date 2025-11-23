@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { Platform } from 'react-native';
 
-// Type definition for React Native FormData blob
-interface FormDataImage {
+// Type definition for React Native file upload
+// React Native's FormData.append() accepts objects with uri, name, and type
+// properties for file uploads, which differs from the standard web Blob API
+interface ReactNativeFile {
     uri: string;
     name: string;
     type: string;
@@ -31,12 +33,16 @@ export const uploadWardrobeItem = async (imageUri: string, category: string, tok
     const match = /\.(\w+)$/.exec(filename || '');
     const type = match ? `image/${match[1]}` : 'image/jpeg';
 
-    const imageBlob: FormDataImage = {
+    const imageFile: ReactNativeFile = {
         uri: imageUri,
         name: filename || 'upload.jpg',
         type,
     };
-    formData.append('image', imageBlob as unknown as Blob);
+    
+    // React Native's FormData implementation accepts ReactNativeFile objects
+    // We cast to unknown first, then to Blob to satisfy TypeScript's type checking
+    // while maintaining our type safety through the ReactNativeFile interface
+    formData.append('image', imageFile as unknown as Blob);
 
     // Append category
     formData.append('category', category);
