@@ -3,7 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
 ### Added
+
 - **BFF**: `POST /wardrobe/items` endpoint for uploading images.
 - **BFF**: `GET /wardrobe/items` endpoint for listing items.
 - **BFF**: `WardrobeItem` interface.
@@ -12,13 +14,17 @@ All notable changes to this project will be documented in this file.
 - **Database**: `processed_image_url` column (`04_add_processed_image.sql`).
 - **BFF**: Background removal logic (Mock implementation).
 - **BFF**: Structured logging with `winston`.
+- **Mobile**: Image upload flow with `expo-image-picker`.
+- **Mobile**: Closet grid view with pull-to-refresh.
+- **Mobile**: Simple tab navigation.
 
 ## [0.1.0] - 2025-11-21
 
 ### Added
+
 - **Monorepo**: Initialized Turborepo with `apps/bff`, `apps/mobile`, `apps/web`, `packages/shared`.
 - **BFF**: Express.js application with TypeScript.
-    - `/health` endpoint.
-    - `/me` endpoint with Supabase Auth Middleware.
+  - `/health` endpoint.
+  - `/me` endpoint with Supabase Auth Middleware.
 - **Database**: `supabase_schema.sql` for `profiles` table and RLS.
 - **Docs**: Initial `task.md`, `implementation_plan.md`, `walkthrough.md`.

@@ -4,11 +4,11 @@
 
 ## Tech Stack
 
--   **Mobile**: React Native (Expo)
--   **Web**: Next.js
--   **Backend-for-Frontend (BFF)**: Express.js (TypeScript)
--   **Database & Auth**: Supabase
--   **Monorepo Tool**: Turborepo
+- **Mobile**: React Native (Expo)
+- **Web**: Next.js
+- **Backend-for-Frontend (BFF)**: Express.js (TypeScript)
+- **Database & Auth**: Supabase
+- **Monorepo Tool**: Turborepo
 
 ## Project Structure
 
@@ -27,12 +27,13 @@
 
 ### Prerequisites
 
--   Node.js (v18+)
--   npm (v10+)
+- Node.js (v18+)
+- npm (v10+)
 
 ### Installation
 
 1.  Clone the repository:
+
     ```bash
     git clone https://github.com/kervcodes/tidywaro.git
     cd tidywaro
@@ -46,6 +47,7 @@
 ### Configuration
 
 1.  **BFF**: Copy `.env.example` to `.env` in `apps/bff` and add your Supabase credentials.
+
     ```bash
     cp apps/bff/.env.example apps/bff/.env
     ```
@@ -60,9 +62,9 @@ Start all applications (BFF, Mobile, Web) in development mode:
 npm run dev
 ```
 
--   **BFF**: http://localhost:3000
--   **Web**: http://localhost:3001 (usually)
--   **Mobile**: Expo Dev Client
+- **BFF**: http://localhost:3000
+- **Web**: http://localhost:3001 (usually)
+- **Mobile**: Expo Dev Client
 
 ## License
 
