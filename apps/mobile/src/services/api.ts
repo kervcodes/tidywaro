@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { Platform } from 'react-native';
 
 // Use 10.0.2.2 for Android Emulator
@@ -21,22 +21,20 @@ const api = axios.create({
  */
 const getErrorMessage = (error: unknown, context: string): string => {
     if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError;
-        
         // Network error (no response received)
-        if (!axiosError.response) {
-            if (axiosError.code === 'ECONNABORTED') {
+        if (!error.response) {
+            if (error.code === 'ECONNABORTED') {
                 return `${context}: Request timeout. Please check your internet connection and try again.`;
             }
-            if (axiosError.message.includes('Network Error')) {
+            if (error.message.includes('Network Error')) {
                 return `${context}: Network error. Please check your internet connection and ensure the server is running.`;
             }
             return `${context}: Unable to connect to server. Please check your internet connection.`;
         }
         
         // HTTP error responses
-        const status = axiosError.response.status;
-        const data = axiosError.response.data as any;
+        const status = error.response.status;
+        const data = error.response.data as { message?: string; error?: string } | undefined;
         const serverMessage = data?.message || data?.error;
         
         switch (status) {
