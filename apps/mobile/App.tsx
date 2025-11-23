@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState } from "react";
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import UploadScreen from './src/screens/UploadScreen';
 import ClosetScreen from './src/screens/ClosetScreen';
 import { AuthProvider } from './src/contexts/AuthContext';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'upload' | 'closet'>('upload');
+  const [activeTab, setActiveTab] = useState<"upload" | "closet">("upload");
 
   return (
     <AuthProvider>
@@ -43,34 +43,33 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   content: {
     flex: 1,
   },
   tabBar: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingBottom: 20, // For iPhone home indicator
+    borderTopColor: "#eee",
     paddingTop: 10,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   tab: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 10,
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#0000ff',
+    borderBottomColor: "#0000ff",
   },
   tabText: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   activeTabText: {
-    color: '#0000ff',
-    fontWeight: 'bold',
+    color: "#0000ff",
+    fontWeight: "bold",
   },
 });
