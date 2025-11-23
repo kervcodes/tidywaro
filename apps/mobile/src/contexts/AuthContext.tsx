@@ -20,15 +20,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             let storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
 
-            // If no token in secure storage, check environment variable and migrate it (dev only)
-            if (!storedToken && __DEV__) {
-                // TODO: Replace with real auth flow (Supabase Auth)
-                // For now, we use a dev-only token from .env
-                const envToken = process.env.EXPO_PUBLIC_DEV_TEMP_TOKEN;
-                if (envToken) {
-                    await SecureStore.setItemAsync(TOKEN_KEY, envToken);
-                    storedToken = envToken;
-                }
+            // TODO: Replace with real auth flow (Supabase Auth)
+            // For now, we use a dev-only token from .env
+            // HARDCODED FOR TESTING ON PHYSICAL DEVICE - FRESH TOKEN (expires 2025-11-23T18:25:57)
+            const envToken = "eyJhbGciOiJIUzI1NiIsImtpZCI6Im84ZjhqWjUxWjRDbDNGZ3giLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2RlZW1rZ29ha2pibG94cmNqZWZmLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI2ZTg3YmExNi1hYzVkLTRjMGQtYTAwZS1hMDZkY2E4ZjIyMWEiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzYzOTIyMzU3LCJpYXQiOjE3NjM5MTg3NTcsImVtYWlsIjoidGVzdHVzZXIxNzYzOTE4NzU2ODk1QGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJ0ZXN0dXNlcjE3NjM5MTg3NTY4OTVAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiNmU4N2JhMTYtYWM1ZC00YzBkLWEwMGUtYTA2ZGNhOGYyMjFhIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NjM5MTg3NTd9XSwic2Vzc2lvbl9pZCI6Ijg5Nzc5NWM5LTIxNzgtNGRhNy04NmMzLWMwY2JkODMxMDI0ZCIsImlzX2Fub255bW91cyI6ZmFsc2V9.heN5ZXG6INHGd479ZYtsAUaoVH7QUwjftu32A6BZChk";
+
+            // FORCE OVERWRITE for testing
+            if (envToken) {
+                await SecureStore.setItemAsync(TOKEN_KEY, envToken);
+                storedToken = envToken;
             }
 
             if (storedToken) {

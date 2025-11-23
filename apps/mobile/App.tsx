@@ -5,17 +5,18 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import UploadScreen from './src/screens/UploadScreen';
 import ClosetScreen from './src/screens/ClosetScreen';
+import PlannerScreen from './src/screens/PlannerScreen';
 import { AuthProvider } from './src/contexts/AuthContext';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"upload" | "closet">("upload");
+  const [activeTab, setActiveTab] = useState<"upload" | "closet" | "planner">("upload");
 
   return (
     <AuthProvider>
       <SafeAreaProvider>
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
           <View style={styles.content}>
-            {activeTab === 'upload' ? <UploadScreen /> : <ClosetScreen />}
+            {activeTab === 'upload' ? <UploadScreen /> : activeTab === 'closet' ? <ClosetScreen /> : <PlannerScreen />}
           </View>
 
           <View style={styles.tabBar}>
@@ -37,6 +38,16 @@ export default function App() {
               accessibilityState={{ selected: activeTab === 'closet' }}
             >
               <Text style={[styles.tabText, activeTab === 'closet' && styles.activeTabText]}>Closet</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'planner' && styles.activeTab]}
+              onPress={() => setActiveTab('planner')}
+              accessibilityRole="tab"
+              accessibilityLabel="Planner tab"
+              accessibilityState={{ selected: activeTab === 'planner' }}
+            >
+              <Text style={[styles.tabText, activeTab === 'planner' && styles.activeTabText]}>Planner</Text>
             </TouchableOpacity>
           </View>
           <StatusBar style="auto" />

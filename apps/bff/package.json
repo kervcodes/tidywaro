@@ -8,6 +8,7 @@
         "start": "node dist/index.js"
     },
     "dependencies": {
+        "@google/generative-ai": "^0.24.1",
         "@supabase/supabase-js": "^2.39.0",
         "@types/form-data": "^2.2.1",
         "@types/node-fetch": "^2.6.13",

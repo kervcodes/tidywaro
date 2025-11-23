@@ -152,4 +152,45 @@ export const getWardrobeItems = async (token: string) => {
     }
 };
 
+/**
+ * Generates a weekly outfit plan
+ * @param startDate - Start date of the plan (YYYY-MM-DD)
+ * @param token - JWT authentication token
+ * @returns Promise resolving to the generated plan
+ */
+export const generateWeeklyPlan = async (startDate: string, token: string) => {
+    try {
+        const response = await api.post('/weekly-plans/generate', { startDate }, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        const errorMessage = getErrorMessage(error, 'Plan generation failed');
+        console.error(errorMessage, error);
+        throw new Error(errorMessage);
+    }
+};
+
+/**
+ * Fetches the current weekly plan
+ * @param token - JWT authentication token
+ * @returns Promise resolving to the current plan
+ */
+export const getWeeklyPlan = async (token: string) => {
+    try {
+        const response = await api.get('/weekly-plans/current', {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        const errorMessage = getErrorMessage(error, 'Fetch plan failed');
+        console.error(errorMessage, error);
+        throw new Error(errorMessage);
+    }
+};
+
 export default api;
