@@ -22,6 +22,9 @@ export default function App() {
             <TouchableOpacity
               style={[styles.tab, activeTab === 'upload' && styles.activeTab]}
               onPress={() => setActiveTab('upload')}
+              accessibilityRole="tab"
+              accessibilityLabel="Upload tab"
+              accessibilityState={{ selected: activeTab === 'upload' }}
             >
               <Text style={[styles.tabText, activeTab === 'upload' && styles.activeTabText]}>Upload</Text>
             </TouchableOpacity>
@@ -29,6 +32,9 @@ export default function App() {
             <TouchableOpacity
               style={[styles.tab, activeTab === 'closet' && styles.activeTab]}
               onPress={() => setActiveTab('closet')}
+              accessibilityRole="tab"
+              accessibilityLabel="Closet tab"
+              accessibilityState={{ selected: activeTab === 'closet' }}
             >
               <Text style={[styles.tabText, activeTab === 'closet' && styles.activeTabText]}>Closet</Text>
             </TouchableOpacity>
@@ -61,8 +67,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: "#0000ff",
+    borderTopWidth: 2,
+    borderTopColor: "#0000ff",
   },
   tabText: {
     fontSize: 16,

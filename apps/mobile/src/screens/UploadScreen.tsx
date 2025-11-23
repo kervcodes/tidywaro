@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Image, View, StyleSheet, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { Button, Image, View, StyleSheet, TextInput, Alert, ActivityIndicator, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadWardrobeItem } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
