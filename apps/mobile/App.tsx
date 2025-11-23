@@ -24,6 +24,7 @@ export default function App() {
               onPress={() => setActiveTab('upload')}
               accessibilityLabel="Upload tab"
               accessibilityRole="tab"
+              accessibilityState={{ selected: activeTab === 'upload' }}
             >
               <Text style={[styles.tabText, activeTab === 'upload' && styles.activeTabText]}>Upload</Text>
             </TouchableOpacity>
@@ -33,6 +34,7 @@ export default function App() {
               onPress={() => setActiveTab('closet')}
               accessibilityLabel="Closet tab"
               accessibilityRole="tab"
+              accessibilityState={{ selected: activeTab === 'closet' }}
             >
               <Text style={[styles.tabText, activeTab === 'closet' && styles.activeTabText]}>Closet</Text>
             </TouchableOpacity>
