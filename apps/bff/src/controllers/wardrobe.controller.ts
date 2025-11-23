@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../config/supabase';
 import { AuthRequest } from '../middleware/auth.middleware';
+import logger from '../utils/logger';
 
 export class WardrobeController {
 
@@ -22,6 +23,7 @@ export class WardrobeController {
 
             res.json(data);
         } catch (error: any) {
+            logger.error(`Error listing items: ${error.message}`, { userId: (req as AuthRequest).user?.id });
             res.status(500).json({ error: error.message });
         }
     }
@@ -32,8 +34,11 @@ export class WardrobeController {
             const file = req.file;
 
             if (!file) {
+                logger.warn('Upload attempted without file', { userId });
                 return res.status(400).json({ error: 'No image file provided' });
             }
+
+            logger.info('Starting item upload', { userId, filename: file.originalname });
 
             // Use scoped client if available
             const client = (req as AuthRequest).supabase || supabase;
@@ -58,12 +63,41 @@ export class WardrobeController {
                 .from('wardrobe-items')
                 .getPublicUrl(filePath);
 
-            // 3. Save Metadata to Database
+            // 3. Background Removal (Mock or Real)
+            let processedImageUrl = null;
+            const removeBgApiKey = process.env.REMOVE_BG_API_KEY;
+
+            if (removeBgApiKey) {
+                // TODO: Implement real call to remove.bg
+                logger.warn('Real background removal not implemented yet', { userId });
+            } else {
+                // Mock: Just copy the original image to 'processed' folder
+                logger.info('Mocking background removal', { userId });
+                const processedPath = `processed/${userId}/${Date.now()}_${file.originalname}`;
+
+                const { error: processedError } = await client
+                    .storage
+                    .from('wardrobe-items')
+                    .upload(processedPath, file.buffer, {
+                        contentType: file.mimetype,
+                    });
+
+                if (!processedError) {
+                    const { data: { publicUrl: procUrl } } = client
+                        .storage
+                        .from('wardrobe-items')
+                        .getPublicUrl(processedPath);
+                    processedImageUrl = procUrl;
+                }
+            }
+
+            // 4. Save Metadata to Database
             const { data: dbData, error: dbError } = await client
                 .from('wardrobe_items')
                 .insert({
                     user_id: userId,
                     image_url: publicUrl,
+                    processed_image_url: processedImageUrl,
                     category: req.body.category || 'uncategorized',
                 })
                 .select()
@@ -73,9 +107,10 @@ export class WardrobeController {
                 throw dbError;
             }
 
+            logger.info('Item uploaded successfully', { userId, itemId: dbData.id });
             res.status(201).json(dbData);
         } catch (error: any) {
-            console.error('Upload error:', error);
+            logger.error('Upload error', { error: error.message, stack: error.stack });
             res.status(500).json({ error: error.message });
         }
     }

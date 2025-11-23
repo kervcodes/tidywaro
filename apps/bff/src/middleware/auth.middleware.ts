@@ -2,6 +2,7 @@ import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { Request, Response, NextFunction } from 'express';
 import { supabase as globalSupabase } from '../config/supabase';
 import dotenv from 'dotenv';
+import logger from '../utils/logger';
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
+        logger.warn('Missing Authorization header');
         return res.status(401).json({ error: 'Missing Authorization header' });
     }
 
@@ -23,6 +25,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     const { data: { user }, error } = await globalSupabase.auth.getUser(token);
 
     if (error || !user) {
+        logger.warn('Invalid token', { error: error?.message });
         return res.status(401).json({ error: 'Invalid token' });
     }
 

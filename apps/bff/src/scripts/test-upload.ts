@@ -35,7 +35,7 @@ async function testUpload() {
 
     if (response.ok) {
         const data = await response.json();
-        console.log('SUCCESS! Uploaded item:', data);
+        console.log('SUCCESS! Uploaded item:', JSON.stringify(data, null, 2));
     } else {
         console.error('FAILED. Status:', response.status);
         const text = await response.text();

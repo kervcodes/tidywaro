@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 - **BFF**: `WardrobeItem` interface.
 - **Storage**: RLS policies for `wardrobe-items` bucket (`03_storage_policy.sql`).
 - **Database**: `wardrobe_items` table SQL (`02_wardrobe_items.sql`).
+- **Database**: `processed_image_url` column (`04_add_processed_image.sql`).
+- **BFF**: Background removal logic (Mock implementation).
+- **BFF**: Structured logging with `winston`.
 
 ## [0.1.0] - 2025-11-21
 

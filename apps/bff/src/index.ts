@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { authMiddleware, AuthRequest } from './middleware/auth.middleware';
 import wardrobeRoutes from './routes/wardrobe.routes';
+import logger from './utils/logger';
 
 dotenv.config();
 
@@ -29,5 +30,5 @@ app.get('/me', authMiddleware, ((req: Request, res: Response) => {
 }) as any);
 
 app.listen(port, () => {
-    console.log(`BFF running on http://localhost:${port}`);
+    logger.info(`BFF running on http://localhost:${port}`);
 });
