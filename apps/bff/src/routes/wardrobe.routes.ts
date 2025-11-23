@@ -23,7 +23,7 @@ router.get("/items", authMiddleware, WardrobeController.listItems);
 router.post(
   "/items",
   authMiddleware,
-  upload.single("image") as RequestHandler,
+  upload.single("image") as unknown as RequestHandler,
   WardrobeController.uploadItem,
 );
 
