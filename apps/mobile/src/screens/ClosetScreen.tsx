@@ -12,7 +12,7 @@ interface WardrobeItem {
 }
 
 export default function ClosetScreen() {
-    const { token } = useAuth();
+    const { token, isLoading } = useAuth();
     const [items, setItems] = useState<WardrobeItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
@@ -36,8 +36,10 @@ export default function ClosetScreen() {
     }, [token]);
 
     useEffect(() => {
-        fetchItems();
-    }, [fetchItems]);
+        if (!isLoading) {
+            fetchItems();
+        }
+    }, [fetchItems, isLoading]);
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -55,10 +57,18 @@ export default function ClosetScreen() {
         </View>
     );
 
-    if (loading) {
+    if (isLoading || loading) {
         return (
             <View style={styles.center}>
                 <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
+    if (!token) {
+        return (
+            <View style={styles.center}>
+                <Text style={styles.errorText}>Authentication required. Please set up authentication.</Text>
             </View>
         );
     }
@@ -114,5 +124,10 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: 'bold',
         textTransform: 'capitalize',
+    },
+    errorText: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
     },
 });

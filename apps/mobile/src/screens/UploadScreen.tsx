@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 
 export default function UploadScreen() {
-    const { token } = useAuth();
+    const { token, isLoading } = useAuth();
     const [image, setImage] = useState<string | null>(null);
     const [category, setCategory] = useState('');
     const [uploading, setUploading] = useState(false);
@@ -37,7 +37,7 @@ export default function UploadScreen() {
         }
 
         if (!token) {
-            Alert.alert('Error', 'Authentication token not available');
+            Alert.alert('Authentication Error', 'Please set up authentication to upload items');
             return;
         }
 
@@ -56,20 +56,28 @@ export default function UploadScreen() {
 
     return (
         <View style={styles.container}>
-            <Button title="Pick an image from camera roll" onPress={pickImage} />
-            {image && <Image source={{ uri: image }} style={styles.image} />}
-
-            <TextInput
-                style={styles.input}
-                placeholder="Category (e.g., Shirts)"
-                value={category}
-                onChangeText={setCategory}
-            />
-
-            {uploading ? (
+            {isLoading ? (
                 <ActivityIndicator size="large" color="#0000ff" />
+            ) : !token ? (
+                <Text style={styles.errorText}>Authentication required. Please set up authentication.</Text>
             ) : (
-                <Button title="Upload Item" onPress={handleUpload} disabled={!image} />
+                <>
+                    <Button title="Pick an image from camera roll" onPress={pickImage} />
+                    {image && <Image source={{ uri: image }} style={styles.image} />}
+
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Category (e.g., Shirts)"
+                        value={category}
+                        onChangeText={setCategory}
+                    />
+
+                    {uploading ? (
+                        <ActivityIndicator size="large" color="#0000ff" />
+                    ) : (
+                        <Button title="Upload Item" onPress={handleUpload} disabled={!image} />
+                    )}
+                </>
             )}
         </View>
     );
@@ -96,5 +104,10 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         paddingHorizontal: 10,
         borderRadius: 5,
+    },
+    errorText: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
     },
 });

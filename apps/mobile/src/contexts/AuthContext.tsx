@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
 
 interface AuthContextType {
@@ -16,17 +16,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [token, setTokenState] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        // Load token from secure storage on app start
-        loadToken();
-    }, []);
-
-    const loadToken = async () => {
+    const loadToken = useCallback(async () => {
         try {
             let storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
             
-            // If no token in secure storage, check environment variable and migrate it
-            if (!storedToken) {
+            // If no token in secure storage, check environment variable and migrate it (dev only)
+            if (!storedToken && __DEV__) {
                 const envToken = process.env.EXPO_PUBLIC_TEMP_TOKEN;
                 if (envToken) {
                     await SecureStore.setItemAsync(TOKEN_KEY, envToken);
@@ -42,7 +37,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        // Load token from secure storage on app start
+        loadToken();
+    }, [loadToken]);
 
     const setToken = async (newToken: string) => {
         try {
