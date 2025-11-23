@@ -43,7 +43,8 @@ export default function UploadScreen() {
             setImage(null);
             setCategory('');
         } catch (error) {
-            Alert.alert('Error', 'Failed to upload item');
+            const errorMessage = error instanceof Error ? error.message : 'Failed to upload item';
+            Alert.alert('Error', errorMessage);
         } finally {
             setUploading(false);
         }

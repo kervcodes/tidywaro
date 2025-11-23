@@ -22,7 +22,8 @@ export default function ClosetScreen() {
             const data = await getWardrobeItems(TEMP_TOKEN);
             setItems(data);
         } catch (error) {
-            console.error('Failed to fetch items', error);
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch items';
+            console.error(errorMessage);
         } finally {
             setLoading(false);
             setRefreshing(false);

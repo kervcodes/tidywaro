@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Platform } from 'react-native';
 
 // Use 10.0.2.2 for Android Emulator
@@ -15,6 +15,55 @@ const DEV_API_URL = Platform.select({
 const api = axios.create({
     baseURL: DEV_API_URL,
 });
+
+/**
+ * Helper function to parse axios errors and provide descriptive error messages
+ */
+const getErrorMessage = (error: unknown, context: string): string => {
+    if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        
+        // Network error (no response received)
+        if (!axiosError.response) {
+            if (axiosError.code === 'ECONNABORTED') {
+                return `${context}: Request timeout. Please check your internet connection and try again.`;
+            }
+            if (axiosError.message.includes('Network Error')) {
+                return `${context}: Network error. Please check your internet connection and ensure the server is running.`;
+            }
+            return `${context}: Unable to connect to server. Please check your internet connection.`;
+        }
+        
+        // HTTP error responses
+        const status = axiosError.response.status;
+        const data = axiosError.response.data as any;
+        const serverMessage = data?.message || data?.error;
+        
+        switch (status) {
+            case 400:
+                return `${context}: Invalid request${serverMessage ? ` - ${serverMessage}` : ''}`;
+            case 401:
+                return `${context}: Authentication failed. Please check your credentials and try again.`;
+            case 403:
+                return `${context}: Access denied. You don't have permission to perform this action.`;
+            case 404:
+                return `${context}: Resource not found. The endpoint may not exist.`;
+            case 413:
+                return `${context}: File too large. Please choose a smaller image.`;
+            case 429:
+                return `${context}: Too many requests. Please wait a moment and try again.`;
+            case 500:
+                return `${context}: Server error${serverMessage ? ` - ${serverMessage}` : '. Please try again later.'}`;
+            case 503:
+                return `${context}: Service unavailable. The server may be down for maintenance.`;
+            default:
+                return `${context}: Request failed with status ${status}${serverMessage ? ` - ${serverMessage}` : ''}`;
+        }
+    }
+    
+    // Unknown error type
+    return `${context}: An unexpected error occurred. Please try again.`;
+};
 
 export const uploadWardrobeItem = async (imageUri: string, category: string, token: string) => {
     const formData = new FormData();
@@ -42,8 +91,9 @@ export const uploadWardrobeItem = async (imageUri: string, category: string, tok
         });
         return response.data;
     } catch (error) {
-        console.error('Upload failed:', error);
-        throw error;
+        const errorMessage = getErrorMessage(error, 'Upload failed');
+        console.error(errorMessage, error);
+        throw new Error(errorMessage);
     }
 };
 
@@ -56,8 +106,9 @@ export const getWardrobeItems = async (token: string) => {
         });
         return response.data;
     } catch (error) {
-        console.error('Fetch items failed:', error);
-        throw error;
+        const errorMessage = getErrorMessage(error, 'Fetch items failed');
+        console.error(errorMessage, error);
+        throw new Error(errorMessage);
     }
 };
 
