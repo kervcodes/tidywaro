@@ -1,117 +1,120 @@
-import { Request, Response } from 'express';
-import { supabase } from '../config/supabase';
-import { AuthRequest } from '../middleware/auth.middleware';
-import logger from '../utils/logger';
+import { Request, Response } from "express";
+import { supabase } from "../config/supabase";
+import { AuthRequest } from "../middleware/auth.middleware";
+import logger from "../utils/logger";
 
 export class WardrobeController {
+  static async listItems(req: Request, res: Response) {
+    try {
+      const userId = (req as AuthRequest).user.id;
 
-    static async listItems(req: Request, res: Response) {
-        try {
-            const userId = (req as AuthRequest).user.id;
+      // Use scoped client if available, otherwise global
+      const client = (req as AuthRequest).supabase || supabase;
 
-            // Use scoped client if available, otherwise global
-            const client = (req as AuthRequest).supabase || supabase;
+      const { data, error } = await client
+        .from("wardrobe_items")
+        .select("*")
+        .eq("user_id", userId);
 
-            const { data, error } = await client
-                .from('wardrobe_items')
-                .select('*')
-                .eq('user_id', userId);
+      if (error) {
+        throw error;
+      }
 
-            if (error) {
-                throw error;
-            }
-
-            res.json(data);
-        } catch (error: any) {
-            logger.error(`Error listing items: ${error.message}`, { userId: (req as AuthRequest).user?.id });
-            res.status(500).json({ error: error.message });
-        }
+      res.json(data);
+    } catch (error: any) {
+      logger.error(`Error listing items: ${error.message}`, {
+        userId: (req as AuthRequest).user?.id,
+      });
+      res.status(500).json({ error: error.message });
     }
+  }
 
-    static async uploadItem(req: Request, res: Response) {
-        try {
-            const userId = (req as AuthRequest).user.id;
-            const file = req.file;
+  static async uploadItem(req: Request, res: Response) {
+    try {
+      const userId = (req as AuthRequest).user.id;
+      const file = req.file;
 
-            if (!file) {
-                logger.warn('Upload attempted without file', { userId });
-                return res.status(400).json({ error: 'No image file provided' });
-            }
+      if (!file) {
+        logger.warn("Upload attempted without file", { userId });
+        return res.status(400).json({ error: "No image file provided" });
+      }
 
-            logger.info('Starting item upload', { userId, filename: file.originalname });
+      logger.info("Starting item upload", {
+        userId,
+        filename: file.originalname,
+      });
 
-            // Use scoped client if available
-            const client = (req as AuthRequest).supabase || supabase;
+      // Use scoped client if available
+      const client = (req as AuthRequest).supabase || supabase;
 
-            // 1. Upload to Supabase Storage
-            const filePath = `${userId}/${Date.now()}_${file.originalname}`;
+      // 1. Upload to Supabase Storage
+      const filePath = `${userId}/${Date.now()}_${file.originalname}`;
 
-            const { data: storageData, error: storageError } = await client
-                .storage
-                .from('wardrobe-items')
-                .upload(filePath, file.buffer, {
-                    contentType: file.mimetype,
-                });
+      const { data: storageData, error: storageError } = await client.storage
+        .from("wardrobe-items")
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+        });
 
-            if (storageError) {
-                throw storageError;
-            }
+      if (storageError) {
+        throw storageError;
+      }
 
-            // 2. Get Public URL
-            const { data: { publicUrl } } = client
-                .storage
-                .from('wardrobe-items')
-                .getPublicUrl(filePath);
+      // 2. Get Public URL
+      const {
+        data: { publicUrl },
+      } = client.storage.from("wardrobe-items").getPublicUrl(filePath);
 
-            // 3. Background Removal (Mock or Real)
-            let processedImageUrl = null;
-            const removeBgApiKey = process.env.REMOVE_BG_API_KEY;
+      // 3. Background Removal (Mock or Real)
+      let processedImageUrl = null;
+      const removeBgApiKey = process.env.REMOVE_BG_API_KEY;
 
-            if (removeBgApiKey) {
-                // TODO: Implement real call to remove.bg
-                logger.warn('Real background removal not implemented yet', { userId });
-            } else {
-                // Mock: Just copy the original image to 'processed' folder
-                logger.info('Mocking background removal', { userId });
-                const processedPath = `processed/${userId}/${Date.now()}_${file.originalname}`;
+      if (removeBgApiKey) {
+        // TODO: Implement real call to remove.bg
+        logger.warn("Real background removal not implemented yet", { userId });
+      } else {
+        // Mock: Just copy the original image to 'processed' folder
+        logger.info("Mocking background removal", { userId });
+        const processedPath = `processed/${userId}/${Date.now()}_${file.originalname}`;
 
-                const { error: processedError } = await client
-                    .storage
-                    .from('wardrobe-items')
-                    .upload(processedPath, file.buffer, {
-                        contentType: file.mimetype,
-                    });
+        const { error: processedError } = await client.storage
+          .from("wardrobe-items")
+          .upload(processedPath, file.buffer, {
+            contentType: file.mimetype,
+          });
 
-                if (!processedError) {
-                    const { data: { publicUrl: procUrl } } = client
-                        .storage
-                        .from('wardrobe-items')
-                        .getPublicUrl(processedPath);
-                    processedImageUrl = procUrl;
-                }
-            }
-
-            // 4. Save Metadata to Database
-            const { data: dbData, error: dbError } = await client
-                .from('wardrobe_items')
-                .insert({
-                    user_id: userId,
-                    image_url: publicUrl,
-                    processed_image_url: processedImageUrl,
-                    category: req.body.category || 'uncategorized',
-                })
-                .select()
-                .single();
-
-            if (dbError) {
-                throw dbError;
-            }
-
-            logger.info('Item uploaded successfully', { userId, itemId: dbData.id });
-            res.status(201).json(dbData);
-        } catch (error: any) {
-            logger.error('Upload error', { error: error.message, stack: error.stack });
-            res.status(500).json({ error: error.message });
+        if (!processedError) {
+          const {
+            data: { publicUrl: procUrl },
+          } = client.storage.from("wardrobe-items").getPublicUrl(processedPath);
+          processedImageUrl = procUrl;
         }
+      }
+
+      // 4. Save Metadata to Database
+      const { data: dbData, error: dbError } = await client
+        .from("wardrobe_items")
+        .insert({
+          user_id: userId,
+          image_url: publicUrl,
+          processed_image_url: processedImageUrl,
+          category: req.body.category || "uncategorized",
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        throw dbError;
+      }
+
+      logger.info("Item uploaded successfully", { userId, itemId: dbData.id });
+      res.status(201).json(dbData);
+    } catch (error: any) {
+      logger.error("Upload error", {
+        error: error.message,
+        stack: error.stack,
+      });
+      res.status(500).json({ error: error.message });
     }
+  }
 }

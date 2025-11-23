@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import { WardrobeController } from '../controllers/wardrobe.controller';
-import { authMiddleware } from '../middleware/auth.middleware';
+import { Router } from "express";
+import { WardrobeController } from "../controllers/wardrobe.controller";
+import { authMiddleware } from "../middleware/auth.middleware";
 
-import multer from 'multer';
+import multer from "multer";
 
 const router = Router();
 
@@ -14,12 +14,17 @@ const upload = multer({ storage: multer.memoryStorage() });
 // GET /wardrobe/items
 // 1. Run authMiddleware (check token)
 // 2. Run WardrobeController.listItems (fetch data)
-router.get('/items', authMiddleware, WardrobeController.listItems);
+router.get("/items", authMiddleware, WardrobeController.listItems);
 
 // POST /wardrobe/items
 // 1. Run authMiddleware
 // 2. Run upload.single('image') -> parses multipart/form-data
 // 3. Run WardrobeController.uploadItem
-router.post('/items', authMiddleware, upload.single('image') as any, WardrobeController.uploadItem);
+router.post(
+  "/items",
+  authMiddleware,
+  upload.single("image") as any,
+  WardrobeController.uploadItem,
+);
 
 export default router;
