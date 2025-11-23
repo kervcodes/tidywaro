@@ -19,16 +19,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const loadToken = useCallback(async () => {
         try {
             let storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
-            
+
             // If no token in secure storage, check environment variable and migrate it (dev only)
             if (!storedToken && __DEV__) {
-                const envToken = process.env.EXPO_PUBLIC_TEMP_TOKEN;
+                // TODO: Replace with real auth flow (Supabase Auth)
+                // For now, we use a dev-only token from .env
+                const envToken = process.env.EXPO_PUBLIC_DEV_TEMP_TOKEN;
                 if (envToken) {
                     await SecureStore.setItemAsync(TOKEN_KEY, envToken);
                     storedToken = envToken;
                 }
             }
-            
+
             if (storedToken) {
                 setTokenState(storedToken);
             }
