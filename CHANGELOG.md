@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 - **Database**: `processed_image_url` column (`04_add_processed_image.sql`).
 - **BFF**: Background removal logic (Mock implementation).
 - **BFF**: Structured logging with `winston`.
+- **Mobile**: Image upload flow with `expo-image-picker`.
+- **Mobile**: Closet grid view with pull-to-refresh.
+- **Mobile**: Simple tab navigation.
 
 ## [0.1.0] - 2025-11-21
 
