@@ -23,7 +23,7 @@ export const uploadWardrobeItem = async (imageUri: string, category: string, tok
     }
 
     // Validate that imageUri is a valid URI format (file://, content://, or http(s)://)
-    const uriPattern = /^(file|content|https?):\/\/.+/i;
+    const uriPattern = /^(file|content|https?):\/\/\S+$/i;
     if (!uriPattern.test(imageUri.trim())) {
         throw new Error('Invalid imageUri: must be a valid URI format (file://, content://, or http(s)://)');
     }
