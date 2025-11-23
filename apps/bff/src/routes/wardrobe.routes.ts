@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, RequestHandler } from "express";
 import { WardrobeController } from "../controllers/wardrobe.controller";
 import { authMiddleware } from "../middleware/auth.middleware";
 
@@ -23,7 +23,7 @@ router.get("/items", authMiddleware, WardrobeController.listItems);
 router.post(
   "/items",
   authMiddleware,
-  upload.single("image") as any,
+  upload.single("image") as RequestHandler,
   WardrobeController.uploadItem,
 );
 
