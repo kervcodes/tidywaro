@@ -28,7 +28,8 @@ export default function ClosetScreen() {
             const data = await getWardrobeItems(token);
             setItems(data);
         } catch (error) {
-            console.error('Failed to fetch items', error);
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch items';
+            console.error(errorMessage);
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -52,6 +53,7 @@ export default function ClosetScreen() {
                 source={{ uri: item.processed_image_url || item.image_url }}
                 style={styles.image}
                 resizeMode="cover"
+                accessibilityLabel={`Wardrobe item: ${item.category}`}
             />
             <Text style={styles.category}>{item.category}</Text>
         </View>
