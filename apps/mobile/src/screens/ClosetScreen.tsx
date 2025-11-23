@@ -44,6 +44,7 @@ export default function ClosetScreen() {
                 source={{ uri: item.processed_image_url || item.image_url }}
                 style={styles.image}
                 resizeMode="cover"
+                accessibilityLabel={`${item.category} wardrobe item`}
             />
             <Text style={styles.category}>{item.category}</Text>
         </View>
