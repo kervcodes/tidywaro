@@ -23,7 +23,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const loadToken = async () => {
         try {
-            const storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
+            let storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
+            
+            // If no token in secure storage, check environment variable and migrate it
+            if (!storedToken) {
+                const envToken = process.env.EXPO_PUBLIC_TEMP_TOKEN;
+                if (envToken) {
+                    await SecureStore.setItemAsync(TOKEN_KEY, envToken);
+                    storedToken = envToken;
+                }
+            }
+            
             if (storedToken) {
                 setTokenState(storedToken);
             }

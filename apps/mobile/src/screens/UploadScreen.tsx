@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button, Image, View, StyleSheet, TextInput, Text, Alert, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadWardrobeItem } from '../services/api';
@@ -6,27 +6,10 @@ import { useAuth } from '../contexts/AuthContext';
 
 
 export default function UploadScreen() {
-    const { token, setToken } = useAuth();
+    const { token } = useAuth();
     const [image, setImage] = useState<string | null>(null);
     const [category, setCategory] = useState('');
     const [uploading, setUploading] = useState(false);
-
-    // Initialize token from environment variable if not already set
-    useEffect(() => {
-        const initializeToken = async () => {
-            if (!token) {
-                const envToken = process.env.EXPO_PUBLIC_TEMP_TOKEN;
-                if (envToken) {
-                    try {
-                        await setToken(envToken);
-                    } catch (error) {
-                        console.error('Failed to initialize token:', error);
-                    }
-                }
-            }
-        };
-        initializeToken();
-    }, [token, setToken]);
 
     const pickImage = async () => {
         // No permissions request is necessary for launching the image library

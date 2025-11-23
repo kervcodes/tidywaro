@@ -12,27 +12,10 @@ interface WardrobeItem {
 }
 
 export default function ClosetScreen() {
-    const { token, setToken } = useAuth();
+    const { token } = useAuth();
     const [items, setItems] = useState<WardrobeItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-
-    // Initialize token from environment variable if not already set
-    useEffect(() => {
-        const initializeToken = async () => {
-            if (!token) {
-                const envToken = process.env.EXPO_PUBLIC_TEMP_TOKEN;
-                if (envToken) {
-                    try {
-                        await setToken(envToken);
-                    } catch (error) {
-                        console.error('Failed to initialize token:', error);
-                    }
-                }
-            }
-        };
-        initializeToken();
-    }, [token, setToken]);
 
     const fetchItems = useCallback(async () => {
         if (!token) {
