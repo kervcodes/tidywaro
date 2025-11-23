@@ -1,15 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Image, View, StyleSheet, TextInput, Text, Alert, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadWardrobeItem } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
-// TODO: Replace with real auth token from context/storage
-const TEMP_TOKEN = process.env.EXPO_PUBLIC_TEMP_TOKEN || '';
 
 export default function UploadScreen() {
+    const { token, setToken } = useAuth();
     const [image, setImage] = useState<string | null>(null);
     const [category, setCategory] = useState('');
     const [uploading, setUploading] = useState(false);
+
+    // Initialize token from environment variable if not already set
+    useEffect(() => {
+        const initializeToken = async () => {
+            if (!token) {
+                const envToken = process.env.EXPO_PUBLIC_TEMP_TOKEN;
+                if (envToken) {
+                    try {
+                        await setToken(envToken);
+                    } catch (error) {
+                        console.error('Failed to initialize token:', error);
+                    }
+                }
+            }
+        };
+        initializeToken();
+    }, [token, setToken]);
 
     const pickImage = async () => {
         // No permissions request is necessary for launching the image library
@@ -36,9 +53,14 @@ export default function UploadScreen() {
             return;
         }
 
+        if (!token) {
+            Alert.alert('Error', 'Authentication token not available');
+            return;
+        }
+
         setUploading(true);
         try {
-            await uploadWardrobeItem(image, category, TEMP_TOKEN);
+            await uploadWardrobeItem(image, category, token);
             Alert.alert('Success', 'Item uploaded successfully!');
             setImage(null);
             setCategory('');

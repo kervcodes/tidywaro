@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { getWardrobeItems } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
-// TODO: Replace with real auth token from context/storage
-const TEMP_TOKEN = process.env.EXPO_PUBLIC_TEMP_TOKEN || '';
 
 interface WardrobeItem {
     id: string;
@@ -13,13 +12,37 @@ interface WardrobeItem {
 }
 
 export default function ClosetScreen() {
+    const { token, setToken } = useAuth();
     const [items, setItems] = useState<WardrobeItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
+    // Initialize token from environment variable if not already set
+    useEffect(() => {
+        const initializeToken = async () => {
+            if (!token) {
+                const envToken = process.env.EXPO_PUBLIC_TEMP_TOKEN;
+                if (envToken) {
+                    try {
+                        await setToken(envToken);
+                    } catch (error) {
+                        console.error('Failed to initialize token:', error);
+                    }
+                }
+            }
+        };
+        initializeToken();
+    }, [token, setToken]);
+
     const fetchItems = useCallback(async () => {
+        if (!token) {
+            setLoading(false);
+            setRefreshing(false);
+            return;
+        }
+
         try {
-            const data = await getWardrobeItems(TEMP_TOKEN);
+            const data = await getWardrobeItems(token);
             setItems(data);
         } catch (error) {
             console.error('Failed to fetch items', error);
@@ -27,7 +50,7 @@ export default function ClosetScreen() {
             setLoading(false);
             setRefreshing(false);
         }
-    }, []);
+    }, [token]);
 
     useEffect(() => {
         fetchItems();
