@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Image, View, StyleSheet, TextInput, Text, Alert, ActivityIndicator } from 'react-native';
+import { Button, Image, View, StyleSheet, TextInput, Alert, ActivityIndicator } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadWardrobeItem } from '../services/api';
 
@@ -43,7 +43,21 @@ export default function UploadScreen() {
             setImage(null);
             setCategory('');
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Failed to upload item';
+            let errorMessage = 'Failed to upload item';
+            if (error) {
+                if (typeof error === 'string') {
+                    errorMessage += `: ${error}`;
+                } else if (error instanceof Error && error.message) {
+                    errorMessage += `: ${error.message}`;
+                } else if (error && typeof error === 'object') {
+                    // Try to extract common error fields
+                    if ('message' in error && typeof error.message === 'string') {
+                        errorMessage += `: ${error.message}`;
+                    } else if ('status' in error && typeof error.status === 'number') {
+                        errorMessage += ` (Status: ${error.status})`;
+                    }
+                }
+            }
             Alert.alert('Error', errorMessage);
         } finally {
             setUploading(false);
@@ -53,7 +67,7 @@ export default function UploadScreen() {
     return (
         <View style={styles.container}>
             <Button title="Pick an image from camera roll" onPress={pickImage} />
-            {image && <Image source={{ uri: image }} style={styles.image} />}
+            {image && <Image source={{ uri: image }} style={styles.image} accessibilityLabel="Selected wardrobe item preview" />}
 
             <TextInput
                 style={styles.input}
