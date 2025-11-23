@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 // Type definition for React Native file upload
 // React Native's FormData.append() accepts objects with uri, name, and type
 // properties for file uploads, which differs from the standard web Blob API
-interface ReactNativeFile {
+interface FormDataImage {
     uri: string;
     name: string;
     type: string;
@@ -13,7 +13,7 @@ interface ReactNativeFile {
 // Use 10.0.2.2 for Android Emulator
 // For physical devices (iPhone/Android), use your computer's local LAN IP address (e.g., 192.168.1.x)
 // REPLACE 'YOUR_LOCAL_IP' with your actual IP address (run `ipconfig` on Windows or `ifconfig` on Mac)
-const LOCAL_IP = '192.168.1.165';
+const LOCAL_IP = process.env.EXPO_PUBLIC_LOCAL_IP || '192.168.1.165';
 
 const DEV_API_URL = Platform.select({
     android: 'http://10.0.2.2:3000',
@@ -40,12 +40,12 @@ const getErrorMessage = (error: unknown, context: string): string => {
             }
             return `${context}: Unable to connect to server. Please check your internet connection.`;
         }
-        
+
         // HTTP error responses
         const status = error.response.status;
         const data = error.response.data as { message?: string; error?: string } | undefined;
         const serverMessage = data?.message || data?.error;
-        
+
         switch (status) {
             case 400:
                 return `${context}: Invalid request${serverMessage ? ` - ${serverMessage}` : ''}`;
@@ -67,7 +67,7 @@ const getErrorMessage = (error: unknown, context: string): string => {
                 return `${context}: Request failed with status ${status}${serverMessage ? ` - ${serverMessage}` : ''}`;
         }
     }
-    
+
     // Unknown error type
     return `${context}: An unexpected error occurred. Please try again.`;
 };
@@ -102,12 +102,12 @@ export const uploadWardrobeItem = async (imageUri: string, category: string, tok
     const match = /\.(\w+)$/.exec(filename || '');
     const type = match ? `image/${match[1]}` : 'image/jpeg';
 
-    const imageFile: ReactNativeFile = {
+    const imageFile: FormDataImage = {
         uri: imageUri,
         name: filename || 'upload.jpg',
         type,
     };
-    
+
     // React Native's FormData implementation accepts ReactNativeFile objects
     // We cast to unknown first, then to Blob to satisfy TypeScript's type checking
     // while maintaining our type safety through the ReactNativeFile interface
@@ -131,6 +131,12 @@ export const uploadWardrobeItem = async (imageUri: string, category: string, tok
     }
 };
 
+/**
+ * Fetches all wardrobe items for the authenticated user
+ * @param token - JWT authentication token
+ * @returns Promise resolving to an array of wardrobe items
+ * @throws Error if fetch fails or token is invalid
+ */
 export const getWardrobeItems = async (token: string) => {
     try {
         const response = await api.get('/wardrobe/items', {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Image, View, StyleSheet, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { Button, Image, View, StyleSheet, TextInput, Alert, ActivityIndicator, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadWardrobeItem } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -69,6 +69,22 @@ export default function UploadScreen() {
         }
     };
 
+    if (isLoading) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
+    if (!token) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.errorText}>Authentication required. Please set up authentication.</Text>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <Button title="Pick an image from camera roll" onPress={pickImage} />
@@ -83,26 +99,8 @@ export default function UploadScreen() {
 
             {uploading ? (
                 <ActivityIndicator size="large" color="#0000ff" />
-            ) : !token ? (
-                <Text style={styles.errorText}>Authentication required. Please set up authentication.</Text>
             ) : (
-                <>
-                    <Button title="Pick an image from camera roll" onPress={pickImage} />
-                    {image && <Image source={{ uri: image }} style={styles.image} />}
-
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Category (e.g., Shirts)"
-                        value={category}
-                        onChangeText={setCategory}
-                    />
-
-                    {uploading ? (
-                        <ActivityIndicator size="large" color="#0000ff" />
-                    ) : (
-                        <Button title="Upload Item" onPress={handleUpload} disabled={!image} />
-                    )}
-                </>
+                <Button title="Upload Item" onPress={handleUpload} disabled={!image} />
             )}
         </View>
     );
