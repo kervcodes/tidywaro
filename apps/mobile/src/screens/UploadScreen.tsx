@@ -86,23 +86,7 @@ export default function UploadScreen() {
             ) : !token ? (
                 <Text style={styles.errorText}>Authentication required. Please set up authentication.</Text>
             ) : (
-                <>
-                    <Button title="Pick an image from camera roll" onPress={pickImage} />
-                    {image && <Image source={{ uri: image }} style={styles.image} />}
-
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Category (e.g., Shirts)"
-                        value={category}
-                        onChangeText={setCategory}
-                    />
-
-                    {uploading ? (
-                        <ActivityIndicator size="large" color="#0000ff" />
-                    ) : (
-                        <Button title="Upload Item" onPress={handleUpload} disabled={!image} />
-                    )}
-                </>
+                <Button title="Upload Item" onPress={handleUpload} disabled={!image} />
             )}
         </View>
     );
