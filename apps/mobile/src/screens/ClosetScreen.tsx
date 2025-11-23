@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { getWardrobeItems } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
-// TODO: Replace with real auth token from context/storage
-const TEMP_TOKEN = process.env.EXPO_PUBLIC_TEMP_TOKEN || '';
 
 interface WardrobeItem {
     id: string;
@@ -13,13 +12,20 @@ interface WardrobeItem {
 }
 
 export default function ClosetScreen() {
+    const { token, isLoading } = useAuth();
     const [items, setItems] = useState<WardrobeItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
     const fetchItems = useCallback(async () => {
+        if (!token) {
+            setLoading(false);
+            setRefreshing(false);
+            return;
+        }
+
         try {
-            const data = await getWardrobeItems(TEMP_TOKEN);
+            const data = await getWardrobeItems(token);
             setItems(data);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to fetch items';
@@ -28,11 +34,13 @@ export default function ClosetScreen() {
             setLoading(false);
             setRefreshing(false);
         }
-    }, []);
+    }, [token]);
 
     useEffect(() => {
-        fetchItems();
-    }, [fetchItems]);
+        if (!isLoading) {
+            fetchItems();
+        }
+    }, [fetchItems, isLoading]);
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
@@ -51,10 +59,18 @@ export default function ClosetScreen() {
         </View>
     );
 
-    if (loading) {
+    if (isLoading || loading) {
         return (
             <View style={styles.center}>
                 <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+        );
+    }
+
+    if (!token) {
+        return (
+            <View style={styles.center}>
+                <Text style={styles.errorText}>Authentication required. Please set up authentication.</Text>
             </View>
         );
     }
@@ -110,5 +126,10 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: 'bold',
         textTransform: 'capitalize',
+    },
+    errorText: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
     },
 });

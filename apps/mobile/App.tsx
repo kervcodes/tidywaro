@@ -5,35 +5,38 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import UploadScreen from './src/screens/UploadScreen';
 import ClosetScreen from './src/screens/ClosetScreen';
+import { AuthProvider } from './src/contexts/AuthContext';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'upload' | 'closet'>('upload');
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        <View style={styles.content}>
-          {activeTab === 'upload' ? <UploadScreen /> : <ClosetScreen />}
-        </View>
+    <AuthProvider>
+      <SafeAreaProvider>
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+          <View style={styles.content}>
+            {activeTab === 'upload' ? <UploadScreen /> : <ClosetScreen />}
+          </View>
 
-        <View style={styles.tabBar}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'upload' && styles.activeTab]}
-            onPress={() => setActiveTab('upload')}
-          >
-            <Text style={[styles.tabText, activeTab === 'upload' && styles.activeTabText]}>Upload</Text>
-          </TouchableOpacity>
+          <View style={styles.tabBar}>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'upload' && styles.activeTab]}
+              onPress={() => setActiveTab('upload')}
+            >
+              <Text style={[styles.tabText, activeTab === 'upload' && styles.activeTabText]}>Upload</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'closet' && styles.activeTab]}
-            onPress={() => setActiveTab('closet')}
-          >
-            <Text style={[styles.tabText, activeTab === 'closet' && styles.activeTabText]}>Closet</Text>
-          </TouchableOpacity>
-        </View>
-        <StatusBar style="auto" />
-      </SafeAreaView>
-    </SafeAreaProvider>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'closet' && styles.activeTab]}
+              onPress={() => setActiveTab('closet')}
+            >
+              <Text style={[styles.tabText, activeTab === 'closet' && styles.activeTabText]}>Closet</Text>
+            </TouchableOpacity>
+          </View>
+          <StatusBar style="auto" />
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 }
 
