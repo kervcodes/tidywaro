@@ -43,3 +43,7 @@ web-build/
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md

@@ -1,73 +1,121 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Session } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
+import { supabase } from '../services/supabase';
+import { logAuth, logger } from '../utils/logger';
 
 interface AuthContextType {
-    token: string | null;
+    session: Session | null;
     isLoading: boolean;
-    setToken: (token: string) => Promise<void>;
-    clearToken: () => Promise<void>;
+    hasCompletedOnboarding: boolean;
+    completeOnboarding: () => Promise<void>;
+    signOut: () => Promise<void>;
+    selectedAvatar: string | null;
+    setSelectedAvatar: (avatar: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const TOKEN_KEY = 'auth_token';
+const ONBOARDING_KEY = 'has_completed_onboarding';
+const AVATAR_KEY = 'tidywaro_selected_avatar';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [token, setTokenState] = useState<string | null>(null);
+    const [session, setSession] = useState<Session | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-
-    const loadToken = useCallback(async () => {
-        try {
-            let storedToken = await SecureStore.getItemAsync(TOKEN_KEY);
-
-            // If no token in secure storage, check environment variable and migrate it (dev only)
-            if (!storedToken && __DEV__) {
-                // TODO: Replace with real auth flow (Supabase Auth)
-                // For now, we use a dev-only token from .env
-                const envToken = process.env.EXPO_PUBLIC_DEV_TEMP_TOKEN;
-                if (envToken) {
-                    await SecureStore.setItemAsync(TOKEN_KEY, envToken);
-                    storedToken = envToken;
-                }
-            }
-
-            if (storedToken) {
-                setTokenState(storedToken);
-            }
-        } catch (error) {
-            console.error('Failed to load token:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+    const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
+    const [selectedAvatar, setAvatarState] = useState<string | null>(null);
 
     useEffect(() => {
-        // Load token from secure storage on app start
-        loadToken();
-    }, [loadToken]);
+        // Load session and onboarding status
+        const loadState = async () => {
+            logger.debug('Loading auth state...');
+            try {
+                // 1. Check Supabase Session
+                const { data: { session } } = await supabase.auth.getSession();
+                setSession(session);
+                logAuth.sessionRestored(!!session);
 
-    const setToken = async (newToken: string) => {
+                // 2. Listen for Auth Changes
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+                    logger.debug('Auth state changed', { event, hasSession: !!session });
+                    setSession(session);
+
+                    if (event === 'SIGNED_IN') {
+                        logAuth.signIn(true);
+                    } else if (event === 'SIGNED_OUT') {
+                        logAuth.signOut();
+                    } else if (event === 'TOKEN_REFRESHED') {
+                        logAuth.tokenRefresh(true);
+                    }
+                });
+
+                // 3. Check Onboarding Status
+                const onboardingStatus = await SecureStore.getItemAsync(ONBOARDING_KEY);
+                const hasOnboarded = onboardingStatus === 'true';
+                setHasCompletedOnboarding(hasOnboarded);
+
+                // 4. Check Selected Avatar
+                const savedAvatar = await SecureStore.getItemAsync(AVATAR_KEY);
+                setAvatarState(savedAvatar);
+
+                logger.debug('Auth state loaded', { hasOnboarded, hasAvatar: !!savedAvatar });
+
+                return () => {
+                    subscription.unsubscribe();
+                };
+            } catch (error) {
+                logger.error('Failed to load auth state', { error: String(error) });
+            } finally {
+                setIsLoading(false);
+                logger.debug('Auth state loading complete');
+            }
+        };
+
+        loadState();
+    }, []);
+
+    const completeOnboarding = async () => {
         try {
-            await SecureStore.setItemAsync(TOKEN_KEY, newToken);
-            setTokenState(newToken);
+            await SecureStore.setItemAsync(ONBOARDING_KEY, 'true');
+            setHasCompletedOnboarding(true);
+            logger.info('Onboarding completed');
         } catch (error) {
-            console.error('Failed to save token:', error);
-            throw error;
+            logger.error('Failed to save onboarding status', { error: String(error) });
         }
     };
 
-    const clearToken = async () => {
+    const setSelectedAvatar = async (avatar: string) => {
         try {
-            await SecureStore.deleteItemAsync(TOKEN_KEY);
-            setTokenState(null);
+            await SecureStore.setItemAsync(AVATAR_KEY, avatar);
+            setAvatarState(avatar);
+            logger.info('Avatar updated', { avatar });
         } catch (error) {
-            console.error('Failed to clear token:', error);
-            throw error;
+            logger.error('Failed to save avatar', { error: String(error) });
+        }
+    };
+
+    const signOut = async () => {
+        try {
+            logger.info('Signing out...');
+            await supabase.auth.signOut();
+            logAuth.signOut();
+            // Optional: Reset onboarding? usage dictates usually no, but helpful for testing.
+            // await SecureStore.deleteItemAsync(ONBOARDING_KEY); 
+        } catch (error) {
+            logger.error('Sign out error', { error: String(error) });
         }
     };
 
     return (
-        <AuthContext.Provider value={{ token, isLoading, setToken, clearToken }}>
+        <AuthContext.Provider value={{
+            session,
+            isLoading,
+            hasCompletedOnboarding,
+            completeOnboarding,
+            signOut,
+            selectedAvatar,
+            setSelectedAvatar
+        }}>
             {children}
         </AuthContext.Provider>
     );
@@ -80,3 +128,4 @@ export const useAuth = () => {
     }
     return context;
 };
+
