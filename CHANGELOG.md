@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- **Docs**: New Design System documentation (`docs/DESIGN_SYSTEM.md`).
+- **Docs**: Updated `README.md` with link to design system and new database migration instructions.
+
+### Changed
+
+- **Database**: Organized all SQL files into `database/` directory.    
+
+
 - **BFF**: `POST /wardrobe/items` endpoint for uploading images.
 - **BFF**: `GET /wardrobe/items` endpoint for listing items.
 - **BFF**: `WardrobeItem` interface.

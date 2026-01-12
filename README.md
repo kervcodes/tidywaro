@@ -55,7 +55,7 @@ tidywaro/
 ├── packages/
 │   └── shared/           # Shared TypeScript types
 │
-└── *.sql                 # Database migrations
+└── database/*.sql              # Database migrations
 ```
 
 ## Getting Started
@@ -111,11 +111,10 @@ tidywaro/
 
 4. **Run database migrations**
    
-   Apply SQL files in order in the Supabase SQL Editor:
-   - `supabase_schema.sql` (base schema)
-   - `02_wardrobe_items.sql`
-   - `03_storage_policy.sql`
-   - ... through `08_wardrobe_items_ai_attributes.sql`
+   Apply SQL files from the `database/` directory in order in the Supabase SQL Editor:
+   - `database/supabase_schema.sql` (base schema)
+   - `database/02_wardrobe_items.sql`
+   - ... and so on, in numeric order
 
 ### Running the App
 
