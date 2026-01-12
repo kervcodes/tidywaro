@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Alert, Image } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { generateWeeklyPlan, getWeeklyPlan } from '../services/api';
+import Header from '../components/Header';
+import { theme } from '../styles/theme';
 
 interface DailyOutfit {
     id: string;
@@ -21,10 +23,10 @@ interface WeeklyPlan {
 }
 
 export default function PlannerScreen() {
-    const insets = useSafeAreaInsets();
-    const { token } = useAuth();
+    const { session } = useAuth();
+    const token = session?.access_token;
     const [loading, setLoading] = useState(false);
-    const [plan, setPlan] = useState<WeeklyPlan | null>(null);
+    const [weekPlan, setWeekPlan] = useState<WeeklyPlan | null>(null);
 
     useEffect(() => {
         if (token) {
@@ -97,10 +99,8 @@ export default function PlannerScreen() {
     );
 
     return (
-        <View style={[styles.container, { paddingTop: insets.top }]}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Weekly Planner</Text>
-            </View>
+        <SafeAreaView style={styles.container} edges={['top']}>
+            <Header title="Style AI" subtitle="Your weekly outfit planner" />
 
             <ScrollView contentContainerStyle={styles.content}>
                 {!plan ? (
@@ -136,34 +136,24 @@ export default function PlannerScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />}
+                        {loading && <ActivityIndicator size="large" color={theme.colors.primary.solid} style={styles.loader} />}
 
                         {plan.daily_outfits?.map(renderDay)}
                     </View>
                 )}
             </ScrollView>
-        </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    header: {
-        padding: 20,
-        backgroundColor: '#fff',
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#333',
+        backgroundColor: theme.colors.background.secondary,
     },
     content: {
-        padding: 16,
+        padding: theme.spacing.lg,
+        paddingBottom: 140,
     },
     emptyState: {
         alignItems: 'center',
@@ -174,17 +164,17 @@ const styles = StyleSheet.create({
     emptyStateText: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#666',
+        color: theme.colors.text.primary,
         marginBottom: 8,
     },
     emptyStateSubtext: {
         fontSize: 14,
-        color: '#999',
+        color: theme.colors.text.secondary,
         textAlign: 'center',
         marginBottom: 24,
     },
     generateButton: {
-        backgroundColor: '#0000ff',
+        backgroundColor: theme.colors.primary.solid,
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 25,
@@ -205,13 +195,13 @@ const styles = StyleSheet.create({
     planDateRange: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#666',
+        color: theme.colors.text.secondary,
     },
     regenerateButton: {
         padding: 8,
     },
     regenerateButtonText: {
-        color: '#0000ff',
+        color: theme.colors.primary.solid,
         fontSize: 14,
     },
     loader: {
@@ -219,14 +209,10 @@ const styles = StyleSheet.create({
     },
     dayCard: {
         backgroundColor: '#fff',
-        borderRadius: 12,
+        borderRadius: 16,
         padding: 16,
         marginBottom: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        ...theme.shadows.md,
     },
     dayHeader: {
         flexDirection: 'row',
@@ -236,11 +222,11 @@ const styles = StyleSheet.create({
     dayName: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
+        color: theme.colors.text.primary,
     },
     date: {
         fontSize: 14,
-        color: '#999',
+        color: theme.colors.text.tertiary,
     },
     infoRow: {
         flexDirection: 'row',
@@ -249,17 +235,17 @@ const styles = StyleSheet.create({
     },
     weather: {
         fontSize: 14,
-        color: '#666',
+        color: theme.colors.text.secondary,
         marginRight: 12,
     },
     badge: {
-        backgroundColor: '#e6e6ff',
+        backgroundColor: theme.colors.primary.solid + '20',
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 4,
     },
     badgeText: {
-        color: '#0000ff',
+        color: theme.colors.primary.solid,
         fontSize: 12,
         fontWeight: '600',
     },
@@ -267,15 +253,15 @@ const styles = StyleSheet.create({
         marginTop: 8,
         paddingTop: 8,
         borderTopWidth: 1,
-        borderTopColor: '#f0f0f0',
+        borderTopColor: theme.colors.neutral[100],
     },
     itemsText: {
         fontSize: 14,
-        color: '#333',
+        color: theme.colors.text.primary,
     },
     emptyText: {
         fontSize: 14,
-        color: '#999',
+        color: theme.colors.text.tertiary,
         fontStyle: 'italic',
     },
 });

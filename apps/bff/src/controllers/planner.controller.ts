@@ -16,28 +16,43 @@ export class PlannerController {
 
             logger.info("Generating weekly plan", { userId, startDate });
 
-            // 1. Generate Plan via AI
-            // We pass the global supabase client to fetch wardrobe items (RLS will be handled by query if needed, 
-            // but here we trust the backend to fetch only user's items as we filter by user_id)
-            // Ideally we should use the scoped client from AuthRequest if we want to enforce RLS at DB level strictly
             const client = (req as AuthRequest).supabase || supabase;
 
+            // Calculate end date
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 6); // 7 days total
+            const endDateStr = endDate.toISOString().split('T')[0];
+
+            // Check for existing plan with overlapping dates and delete it
+            const { data: existingPlans } = await client
+                .from("weekly_plans")
+                .select("id")
+                .eq("user_id", userId)
+                .or(`start_date.lte.${endDateStr},end_date.gte.${startDate}`);
+
+            if (existingPlans && existingPlans.length > 0) {
+                logger.info("Deleting existing overlapping plans", { 
+                    count: existingPlans.length,
+                    planIds: existingPlans.map(p => p.id)
+                });
+
+                // Delete daily outfits first (foreign key constraint)
+                for (const plan of existingPlans) {
+                    await client.from("daily_outfits").delete().eq("plan_id", plan.id);
+                    await client.from("weekly_plans").delete().eq("id", plan.id);
+                }
+            }
+
+            // 1. Generate Plan via AI
             const generatedPlan = await AIService.generateWeeklyPlan(client, userId, startDate);
 
             // 2. Save to Database
-            // Start a transaction-like sequence (Supabase doesn't support multi-table transactions via JS client easily without RPC, 
-            // so we'll do it sequentially. If it fails, we might have a partial state, but for MVP this is acceptable)
-
-            // 2a. Create Weekly Plan Record
-            const endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 6); // 7 days total
-
             const { data: planData, error: planError } = await client
                 .from("weekly_plans")
                 .insert({
                     user_id: userId,
                     start_date: startDate,
-                    end_date: endDate.toISOString().split('T')[0],
+                    end_date: endDateStr,
                 })
                 .select()
                 .single();

@@ -1,59 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-
-import UploadScreen from './src/screens/UploadScreen';
-import ClosetScreen from './src/screens/ClosetScreen';
-import PlannerScreen from './src/screens/PlannerScreen';
+import { StyleSheet, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from './src/contexts/AuthContext';
+import AppNavigator from './src/navigation/AppNavigator';
+import ErrorBoundary from './src/components/ErrorBoundary';
+import { logger } from './src/utils/logger';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"upload" | "closet" | "planner">("upload");
-
+  logger.info('App starting');
+  
   return (
-    <AuthProvider>
-      <SafeAreaProvider>
-        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-          <View style={styles.content}>
-            {activeTab === 'upload' ? <UploadScreen /> : activeTab === 'closet' ? <ClosetScreen /> : <PlannerScreen />}
+    <ErrorBoundary>
+      <AuthProvider>
+        <SafeAreaProvider>
+          <View style={styles.container}>
+            <AppNavigator />
+            <StatusBar style="auto" />
           </View>
-
-          <View style={styles.tabBar}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'upload' && styles.activeTab]}
-              onPress={() => setActiveTab('upload')}
-              accessibilityRole="tab"
-              accessibilityLabel="Upload tab"
-              accessibilityState={{ selected: activeTab === 'upload' }}
-            >
-              <Text style={[styles.tabText, activeTab === 'upload' && styles.activeTabText]}>Upload</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'closet' && styles.activeTab]}
-              onPress={() => setActiveTab('closet')}
-              accessibilityRole="tab"
-              accessibilityLabel="Closet tab"
-              accessibilityState={{ selected: activeTab === 'closet' }}
-            >
-              <Text style={[styles.tabText, activeTab === 'closet' && styles.activeTabText]}>Closet</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'planner' && styles.activeTab]}
-              onPress={() => setActiveTab('planner')}
-              accessibilityRole="tab"
-              accessibilityLabel="Planner tab"
-              accessibilityState={{ selected: activeTab === 'planner' }}
-            >
-              <Text style={[styles.tabText, activeTab === 'planner' && styles.activeTabText]}>Planner</Text>
-            </TouchableOpacity>
-          </View>
-          <StatusBar style="auto" />
-        </SafeAreaView>
-      </SafeAreaProvider>
-    </AuthProvider>
+        </SafeAreaProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -61,32 +28,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-  },
-  content: {
-    flex: 1,
-  },
-  tabBar: {
-    flexDirection: "row",
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-    paddingTop: 10,
-    backgroundColor: "#fff",
-  },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 10,
-  },
-  activeTab: {
-    borderTopWidth: 2,
-    borderTopColor: "#0000ff",
-  },
-  tabText: {
-    fontSize: 16,
-    color: "#666",
-  },
-  activeTabText: {
-    color: "#0000ff",
-    fontWeight: "bold",
   },
 });

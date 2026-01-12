@@ -2,7 +2,7 @@ import { createClient, SupabaseClient, User } from "@supabase/supabase-js";
 import { Request, Response, NextFunction } from "express";
 import { supabase as globalSupabase } from "../config/supabase";
 import dotenv from "dotenv";
-import logger from "../utils/logger";
+import logger, { logAuth } from "../utils/logger";
 
 dotenv.config();
 
@@ -17,13 +17,19 @@ export const authMiddleware = async (
   next: NextFunction,
 ) => {
   const authHeader = req.headers.authorization;
+  const path = req.path;
 
   if (!authHeader) {
-    logger.warn("Missing Authorization header");
+    logAuth(`Missing auth header for ${path}`, undefined, false);
     return res.status(401).json({ error: "Missing Authorization header" });
   }
 
   const token = authHeader.split(" ")[1];
+  
+  if (!token) {
+    logAuth(`Empty token for ${path}`, undefined, false);
+    return res.status(401).json({ error: "Invalid token format" });
+  }
 
   // Verify token using global client
   const {
@@ -32,9 +38,12 @@ export const authMiddleware = async (
   } = await globalSupabase.auth.getUser(token);
 
   if (error || !user) {
-    logger.warn("Invalid token", { error: error?.message });
+    logAuth(`Invalid token for ${path}`, undefined, false);
+    logger.debug("Token validation error", { error: error?.message });
     return res.status(401).json({ error: "Invalid token" });
   }
+
+  logAuth(`Authenticated for ${path}`, user.id, true);
 
   // Create a scoped client for this request
   // This ensures RLS policies work correctly using the user's auth context
